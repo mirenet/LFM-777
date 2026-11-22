@@ -105,10 +105,12 @@ public class MenuControler {
                 break;
 
             case MotionEvent.ACTION_CANCEL:
+                cancelHold();
                 if (menuTriggered) {
                     menuTriggered = false;
                     return true;
                 }
+                menuTriggered = false;
                 break;
         }
 
