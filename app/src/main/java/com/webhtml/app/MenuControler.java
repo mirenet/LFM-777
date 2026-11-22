@@ -10,7 +10,7 @@ import android.webkit.WebView;
 public class MenuControler {
 
     // Malo duže od sistemskog long-press-a (~400-500 ms) da stigne selekcija teksta ako ti treba
-    private static final long HOLD_DELAY_MS = 2000L;
+    private static final long HOLD_DELAY_MS = 1500L;
 
     private static final int REQUIRED_FINGERS = 1;
 
@@ -23,6 +23,7 @@ public class MenuControler {
     private boolean holdScheduled = false;
     private boolean menuTriggered = false;
     private boolean consumeUntilRelease = false;
+    private boolean longClickGuardAttached = false;
     private float[] initialX;
     private float[] initialY;
 
@@ -43,9 +44,12 @@ public class MenuControler {
 
     public MenuControler(WebView overlayWebView) {
         this.overlayWebView = overlayWebView;
+        ensureLongClickGuard();
     }
 
     public boolean handleTouchEvent(MotionEvent event) {
+        ensureLongClickGuard();
+
         int action = event.getActionMasked();
         int pointerCount = event.getPointerCount();
 
@@ -105,16 +109,48 @@ public class MenuControler {
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                cancelHold();
                 if (menuTriggered) {
                     menuTriggered = false;
                     return true;
                 }
-                menuTriggered = false;
                 break;
         }
 
         return false;
+    }
+
+    private void ensureLongClickGuard() {
+        if (longClickGuardAttached || overlayWebView == null) return;
+        View root = overlayWebView.getRootView();
+        if (root instanceof ViewGroup) {
+            attachLongClickGuardRecursive((ViewGroup) root);
+            longClickGuardAttached = true;
+        }
+    }
+
+    private void attachLongClickGuardRecursive(ViewGroup group) {
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View child = group.getChildAt(i);
+            if (child instanceof WebView && child != overlayWebView) {
+                WebView target = (WebView) child;
+                target.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        WebView.HitTestResult hit = target.getHitTestResult();
+                        if (hit != null) {
+                            int type = hit.getType();
+                            if (type == WebView.HitTestResult.SRC_ANCHOR_TYPE ||
+                                type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                });
+            } else if (child instanceof ViewGroup) {
+                attachLongClickGuardRecursive((ViewGroup) child);
+            }
+        }
     }
 
     public void cancelGesture() {
