@@ -10,7 +10,7 @@ import android.webkit.WebView;
 public class MenuControler {
 
     // Malo duže od sistemskog long-press-a (~400-500 ms) da stigne selekcija teksta ako ti treba
-    private static final long HOLD_DELAY_MS = 1500L;
+    private static final long HOLD_DELAY_MS = 3000L;
 
     private static final int REQUIRED_FINGERS = 1;
 
