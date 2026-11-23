@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -438,6 +439,11 @@ public class MainActivity extends AppCompatActivity {
                 DialogHelper.showCustomAlert(MainActivity.this, message, result);
                 return true;
             }
+
+            @Override
+            public Bitmap getDefaultVideoPoster() {
+            return BitmapFactory.decodeResource(getResources(), R.drawable.video);
+            } // hide webview video placeholder image
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
