@@ -9,10 +9,11 @@ import android.webkit.WebView;
 
 public class MenuControler {
 
-    // Long-press delay in seconds..
-    private static final long HOLD_DELAY_MS = 1500L;
+    // Long-press delay in milliseconds (1500 ms = 1.5 s)
+    private static final long HOLD_DELAY_MS = 1000L;
 
-    private static final int REQUIRED_FINGERS = 1;
+    // Promenite na 1, 2, 3 ili bilo koji tačan broj prstiju koji mora biti spušten
+    private static final int REQUIRED_FINGERS = 2;
 
     // Maksimalno dozvoljeno pomeranje prsta dok se čeka delay (u pikselima)
     private static final float MOVE_SLOP_PX = 25.0f;
@@ -75,6 +76,7 @@ public class MenuControler {
                     recordInitialPointers(event);
                     scheduleHold();
                 } else {
+                    // Ako je spušteno manje ili više prstiju od REQUIRED_FINGERS, otkazujemo čekanje
                     cancelHold();
                 }
                 break;
@@ -94,7 +96,8 @@ public class MenuControler {
                 if (menuTriggered) {
                     return true;
                 }
-                if (holdScheduled && (pointerCount - 1) < REQUIRED_FINGERS) {
+                // Cim se podigne jedan od prstiju, broj aktivnih prstiju postaje (pointerCount - 1)
+                if (holdScheduled && (pointerCount - 1) != REQUIRED_FINGERS) {
                     cancelHold();
                 }
                 break;
@@ -109,6 +112,7 @@ public class MenuControler {
                 break;
 
             case MotionEvent.ACTION_CANCEL:
+                cancelHold();
                 if (menuTriggered) {
                     menuTriggered = false;
                     return true;
